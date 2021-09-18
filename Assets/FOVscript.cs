@@ -8,6 +8,10 @@ using KModkit;
 
 public class FOVscript : MonoBehaviour
 {
+#pragma warning disable 0649
+    private bool TwitchPlaysActive;
+#pragma warning restore 0649
+
     public new KMAudio audio;
     public KMBombInfo bomb;
 	public KMBombModule module;
@@ -247,11 +251,10 @@ public class FOVscript : MonoBehaviour
             {
                 if (int.Parse(finalString[correctInputs].ToString()) == k)
                 {
-                    int rndSpeak = UnityEngine.Random.Range(0, 16);
-                    audio.PlaySoundAtTransform(speakers[10 * rndSpeak + k].name, transform);
                     Debug.LogFormat("[Forget Our Voices #{0}]: Button {1} pressed and it's correct for stage #{2}", moduleId, k, correctInputs + 1);
                     correctInputs++;
                     ShowCurrentInput();
+                    stageCount.text = "--";
                     recovery = false;
                     if (correctInputs >= totalStages)
                     {
@@ -262,6 +265,11 @@ public class FOVscript : MonoBehaviour
                         audio.PlaySoundAtTransform(solveSounds[yay].name, transform);
                         Debug.LogFormat("[Forget Our Voices #{0}]: All inputs submitted, module solved.", moduleId);
                     }
+                    else
+                    {
+                        int rndSpeak = UnityEngine.Random.Range(0, 16);
+                        audio.PlaySoundAtTransform(speakers[10 * rndSpeak + k].name, transform);
+                    }
                 }
                 else
                 {
@@ -270,6 +278,21 @@ public class FOVscript : MonoBehaviour
                     audio.PlaySoundAtTransform(strikeSounds[lmao].name, transform);
                     Debug.LogFormat("[Forget Our Voices #{0}]: Strike! Wrong input. The correct input is {1}.", moduleId, finalString[correctInputs]);
                     recovery = true;
+                    if (correctInputs < 99)
+                    {
+                        if (correctInputs < 9)
+                        {
+                            stageCount.text = "0" + (correctInputs + 1).ToString();
+                        }
+                        else
+                        {
+                            stageCount.text = (correctInputs + 1).ToString();
+                        }
+                    }
+                    else
+                    {
+                        stageCount.text = ((correctInputs + 1) % 100).ToString("00");
+                    }
                 }
             }
             else
@@ -354,8 +377,58 @@ public class FOVscript : MonoBehaviour
                 else
                 {
                     advanceStage();
+                    if (TwitchPlaysActive)
+                    {
+                        bigScreen.OnInteract();
+                    }
                 }
             }
         }
     }
+
+    //Twitch Plays
+#pragma warning disable 414
+    private const string TwitchHelpMessage = @"!{0} play to press the big button, !{0} type 69420 to type in 69420 at the end";
+#pragma warning restore 414
+
+    IEnumerator ProcessTwitchCommand(string command)
+    {
+        if (Regex.IsMatch(command, @"^\s*play\s*$", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant))
+        {
+            bigScreen.OnInteract();
+        }
+        string[] parameters = command.Split(' ');
+        if (Regex.IsMatch(parameters[0], @"^\s*type\s*$", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant))
+        {
+            if (inputMode)
+            {
+                yield return "sendtochat PogChamp Here we go!";
+            }
+            for (int i = 0; i < parameters[1].Length; i++)
+            {
+                yield return new WaitForSeconds(0.1f);
+                for (int j = 0; j < 10; j++)
+                {
+                    string comparer = parameters[1].ElementAt(i) + "";
+                    if (comparer.Equals(j.ToString()))
+                    {
+                        buttons[j].OnInteract();
+                    }
+                }
+            }
+        }
+    }
+    IEnumerator TwitchHandleForcedSolve()
+    {
+        while (!inputMode)
+        {
+            yield return true;
+        }
+        while (!moduleSolved)
+        {
+            buttons[finalString[correctInputs] - '0'].OnInteract();
+            yield return null;
+        }
+    }
+
 }
