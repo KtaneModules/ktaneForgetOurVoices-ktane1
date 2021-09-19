@@ -161,6 +161,7 @@ public class FOVscript : MonoBehaviour
         bigScreen.AddInteractionPunch(0.5f);
         if (!inputMode)
         {
+            Debug.Log(speakers[initialString[currentStage]]);            
             audio.PlaySoundAtTransform(speakers[initialString[currentStage]].name, transform);
         }
         else if (recovery)
