@@ -397,6 +397,7 @@ public class FOVscript : MonoBehaviour
         if (Regex.IsMatch(command, @"^\s*play\s*$", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant))
         {
             bigScreen.OnInteract();
+            yield return null;
         }
         string[] parameters = command.Split(' ');
         if (Regex.IsMatch(parameters[0], @"^\s*type\s*$", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant))
