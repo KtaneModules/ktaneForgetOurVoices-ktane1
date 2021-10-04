@@ -15,11 +15,12 @@ MonoBehaviour:
   title: Forget Our Voices
   author: ktane1
   description: "An audio-based FMN-styled boss module, because no one has ever implement
-    it yet.\n\nSpecial thanks to 1254, Arceus, Bomberjack, Danielstigman, Dbros1000,
-    Depresso, Dicey, Grunkle Squeaky, jTIS, Krispy, M\xE1sQu\xE9\xC9lite, Obvious,
-    OEGamer, ScopingLandscape, and ShadowMeow for volunteering to share their voices
-    for the module!\nAlso special thanks to Obvious (again) for contributing to the
-    base idea of this module.\n\nMod ID: forgetOurVoices\nManual Link:TBA"
-  version: v1.4
+    it yet.\n\nSpecial thanks to 1254, Arceus, Asew12321, Axodeau, Bomberjack, Cooldoom,
+    CrazyCaleb, Danielstigman, Dbros1000, Depresso, Dicey, Eltrick, GhostSalt, Grunkle
+    Squeaky, jTIS, Krispy, M\xE1sQu\xE9\xC9lite, Obvious, OEGamer, Piissii, ScopingLandscape,
+    ShadowMeow, and short_c1rcuit for volunteering to share their voices for the module!\nAlso
+    special thanks to Obvious (again) for contributing to the base idea of this module.\n\nMod
+    ID: forgetOurVoices\nManual Link: https://ktane.timwi.de/HTML/Forget%20Our%20Voices.html"
+  version: v1.5.1
   outputFolder: build
   previewImage: {fileID: 2800000, guid: 616f9b6db341ce74d9d90deed9ca1a14, type: 3}

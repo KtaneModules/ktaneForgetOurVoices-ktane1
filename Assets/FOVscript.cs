@@ -33,10 +33,11 @@ public class FOVscript : MonoBehaviour
 
     private string[] tableA = new string[]
     {
-        "ShadowMeow", "Dicey", "MásQuéÉlite", "Obvious",
-        "1254", "Dbros1000", "Bomberjack", "Danielstigman",
-        "Depresso", "ktane1", "OEGamer", "jTIS",
-        "Krispy", "Grunkle Squeaky", "Arceus", "ScopingLandscape",
+        "ShadowMeow", "Dicey", "MásQuéÉlite", "Obvious", "1254",
+        "Dbros1000", "Bomberjack", "Danielstigman", "Depresso", "ktane1",
+        "OEGamer", "jTIS", "Krispy", "Grunkle Squeaky", "Arceus",
+        "ScopingLandscape", "Emik", "GhostSalt", "Short_c1rcuit", "Eltrick",
+        "Axodeau", "Asew", "Cooldoom", "Piissii", "CrazyCaleb"
     };
 
     private int[] tableB = new int[]
@@ -142,6 +143,13 @@ public class FOVscript : MonoBehaviour
                 module.HandlePass();
             }
         };
+        bomb.OnBombExploded += delegate ()
+        {
+            if (currentStage < totalStages)
+            {
+                Debug.LogFormat("[Forget Our Voices #{0}]: Up to {1} stage(s) are displayed before the bomb detonated. For checking, the answer string so far is {2}.", moduleId, currentStage + 1, finalString);
+            }
+        };
         playButton.text = "▶";
         input.text = "";
 
@@ -186,22 +194,22 @@ public class FOVscript : MonoBehaviour
         {
             if (prevSpeaker > speaker)
             {
-                if (prevSpeaker / 4 == speaker / 4)
+                if (prevSpeaker / 5 == speaker / 5)
                 {
                     Debug.LogFormat("[Forget Our Voices #{0}]: The correct direction is west.", moduleId);
                     modifier = 10 * (prevMod / 10) + ((((prevMod % 10 - 1) % 10) + 10) % 10);
                 }
-                else if (prevSpeaker % 4 == speaker % 4)
+                else if (prevSpeaker % 5 == speaker % 5)
                 {
                     Debug.LogFormat("[Forget Our Voices #{0}]: The correct direction is north.", moduleId);
                     modifier = 10 * ((((prevMod / 10 - 1) % 10) + 10) % 10) + prevMod % 10;
                 }
-                else if (prevSpeaker % 4 > speaker % 4)
+                else if (prevSpeaker % 5 > speaker % 5)
                 {
                     Debug.LogFormat("[Forget Our Voices #{0}]: The correct direction is northwest.", moduleId);
                     modifier = 10 * ((((prevMod / 10 - 1) % 10) + 10) % 10) +((((prevMod % 10 - 1) % 10) + 10) % 10);
                 }
-                else if (prevSpeaker % 4 < speaker % 4)
+                else if (prevSpeaker % 5 < speaker % 5)
                 {
                     Debug.LogFormat("[Forget Our Voices #{0}]: The correct direction is northeast.", moduleId);
                     modifier = 10 * ((((prevMod / 10 - 1) % 10) + 10) % 10) + (prevMod % 10 + 1) % 10;
@@ -209,22 +217,22 @@ public class FOVscript : MonoBehaviour
             }
             else if (prevSpeaker < speaker)
             {
-                if (prevSpeaker / 4 == speaker / 4)
+                if (prevSpeaker / 5 == speaker / 5)
                 {
                     Debug.LogFormat("[Forget Our Voices #{0}]: The correct direction is east.", moduleId);
                     modifier = 10 * (prevMod / 10) + (prevMod % 10 + 1) % 10;
                 }
-                else if (prevSpeaker % 4 == speaker % 4)
+                else if (prevSpeaker % 5 == speaker % 5)
                 {                    
                     Debug.LogFormat("[Forget Our Voices #{0}]: The correct direction is south.", moduleId);
                     modifier = 10 * ((prevMod / 10 + 1) % 10) + prevMod % 10;
                 }
-                else if (prevSpeaker % 4 > speaker % 4)
+                else if (prevSpeaker % 5 > speaker % 5)
                 {
                     Debug.LogFormat("[Forget Our Voices #{0}]: The correct direction is southwest.", moduleId);
                     modifier = 10 * ((prevMod / 10 + 1) % 10) + ((((prevMod % 10 - 1) % 10) + 10) % 10);
                 }
-                else if (prevSpeaker % 4 < speaker % 4)
+                else if (prevSpeaker % 5 < speaker % 5)
                 {
                     Debug.LogFormat("[Forget Our Voices #{0}]: The correct direction is southeast.", moduleId);
                     modifier = 10 * ((prevMod / 10 + 1) % 10) + (prevMod % 10 + 1) % 10;
