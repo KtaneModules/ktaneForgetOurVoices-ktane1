@@ -13,12 +13,13 @@ public class FOVscript : MonoBehaviour
 #pragma warning restore 0649
 
     public new KMAudio audio;
+    public KMAudio.KMAudioRef audioRef;
     public KMBombInfo bomb;
 	public KMBombModule module;
     public KMBossModule bossHandler;
 
     public KMSelectable[] buttons;
-    public KMSelectable bigScreen;
+    public KMSelectable bigScreen, smallScreen;
     public TextMesh stageCount, input, playButton;
 
     private int currentStage = -1;
@@ -28,6 +29,7 @@ public class FOVscript : MonoBehaviour
     private string[] ignoredModules;
 
     private int[] initialString;
+    private int[] positions;
     private string finalString;
     public AudioClip[] speakers, solveSounds, strikeSounds;
 
@@ -57,6 +59,7 @@ public class FOVscript : MonoBehaviour
     private static int moduleIdCounter = 1;
     private int moduleId;
     private bool recovery = false;
+    private bool prevVoice = false;
     private bool moduleActivated, inputMode, moduleSolved; // Some helpful booleans
 
     void Awake()
@@ -68,6 +71,7 @@ public class FOVscript : MonoBehaviour
             buttons[j].OnInteract += () => { buttonHandler(j); return false; };
         }
         bigScreen.OnInteract += () => { playHandler(); return false; };
+        smallScreen.OnInteract += () => { recoveryHandler(); return false; };
     }
 
     void Start()
@@ -134,6 +138,7 @@ public class FOVscript : MonoBehaviour
             {
                 Debug.LogFormat("[Forget Our Voices #{0}]: {1} stage(s) generatable.", moduleId, totalStages);
                 initialString = new int[totalStages];
+                positions = new int[totalStages];
                 moduleActivated = true;
             }
             else
@@ -174,12 +179,24 @@ public class FOVscript : MonoBehaviour
         }
         else if (recovery)
         {
-            audio.PlaySoundAtTransform(speakers[initialString[correctInputs]].name, transform);
+            if (correctInputs == 0)
+            {
+                audio.PlaySoundAtTransform(speakers[initialString[correctInputs]].name, transform);
+            }
+            else if (prevVoice)
+            {
+                audio.PlaySoundAtTransform(speakers[initialString[correctInputs - 1]].name, transform);
+            }
+            else
+            {
+                audio.PlaySoundAtTransform(speakers[initialString[correctInputs]].name, transform);
+            }
         }
     }
 
     void stageGenerator()
     {
+        Debug.LogFormat("[Forget Our Voices #{0}]: -------------------------------------------------------", moduleId);
         int speaker = UnityEngine.Random.Range(0, tableA.Length);
         int digit = UnityEngine.Random.Range(0, 10);
         initialString[currentStage] = 10 * speaker + digit;
@@ -247,6 +264,7 @@ public class FOVscript : MonoBehaviour
         prevMod = modifier;
         prevSpeaker = speaker;
         Debug.LogFormat("[Forget Our Voices #{0}]: The cell you should get in Table B is in row {1}. column {2}, getting the number {3}.", moduleId, modifier / 10, modifier % 10, tableB[modifier]);
+        positions[currentStage] = modifier;
         int finalDigit = (((tableB[modifier] / 10 + 1) * (digit + 1)) % 11 + tableB[modifier] - 1) % 10;
         finalString = finalString + finalDigit.ToString();
         Debug.LogFormat("[Forget Our Voices #{0}]: The correct digit for this stage is {1}.", moduleId, finalString[currentStage]);
@@ -263,30 +281,6 @@ public class FOVscript : MonoBehaviour
                     Debug.LogFormat("[Forget Our Voices #{0}]: Button {1} pressed and it's correct for stage #{2}", moduleId, k, correctInputs + 1);
                     correctInputs++;
                     ShowCurrentInput();
-                    stageCount.text = "--";
-                    recovery = false;
-                    if (correctInputs >= totalStages)
-                    {
-                        module.HandlePass();
-                        moduleSolved = true;
-                        stageCount.text = "GG";
-                        int yay = UnityEngine.Random.Range(0, solveSounds.Length);
-                        audio.PlaySoundAtTransform(solveSounds[yay].name, transform);
-                        Debug.LogFormat("[Forget Our Voices #{0}]: All inputs submitted, module solved.", moduleId);
-                    }
-                    else
-                    {
-                        int rndSpeak = UnityEngine.Random.Range(0, 16);
-                        audio.PlaySoundAtTransform(speakers[10 * rndSpeak + k].name, transform);
-                    }
-                }
-                else
-                {
-                    module.HandleStrike();
-                    int lmao = UnityEngine.Random.Range(0, strikeSounds.Length);
-                    audio.PlaySoundAtTransform(strikeSounds[lmao].name, transform);
-                    Debug.LogFormat("[Forget Our Voices #{0}]: Strike! Wrong input. The correct input is {1}.", moduleId, finalString[correctInputs]);
-                    recovery = true;
                     if (correctInputs < 99)
                     {
                         if (correctInputs < 9)
@@ -302,6 +296,41 @@ public class FOVscript : MonoBehaviour
                     {
                         stageCount.text = ((correctInputs + 1) % 100).ToString("00");
                     }
+                    recovery = false;
+                    prevVoice = false;
+                    if (correctInputs >= totalStages)
+                    {
+                        module.HandlePass();
+                        moduleSolved = true;
+                        stageCount.text = "GG";
+                        int yay = UnityEngine.Random.Range(0, solveSounds.Length);
+                        audio.PlaySoundAtTransform(solveSounds[yay].name, transform);
+                        Debug.LogFormat("[Forget Our Voices #{0}]: All inputs submitted, module solved.", moduleId);
+                    }
+                    else
+                    {
+                        int rndSpeak = UnityEngine.Random.Range(0, 16);
+                        if (audioRef != null) { audioRef.StopSound(); audioRef = null; }
+                        audioRef = audio.HandlePlaySoundAtTransformWithRef(speakers[10 * rndSpeak + k].name, transform, false);
+                        
+                    }
+                }
+                else
+                {
+                    module.HandleStrike();
+                    int lmao = UnityEngine.Random.Range(0, strikeSounds.Length);
+                    audio.PlaySoundAtTransform(strikeSounds[lmao].name, transform);
+                    Debug.LogFormat("[Forget Our Voices #{0}]: Strike! Wrong input. The correct input is {1}.", moduleId, finalString[correctInputs]);
+                    recovery = true;
+                    prevVoice = true;
+                    if (positions[correctInputs] < 10)
+                    {
+                        stageCount.text = "0" + positions[correctInputs].ToString();
+                    }
+                    else
+                    {
+                        stageCount.text = positions[correctInputs].ToString();
+                    }
                 }
             }
             else
@@ -311,6 +340,15 @@ public class FOVscript : MonoBehaviour
             }
         }
         
+    }
+
+    void recoveryHandler()
+    {
+        if (!moduleSolved && inputMode && recovery)
+        {
+            smallScreen.AddInteractionPunch(0.3f);
+            prevVoice = !prevVoice;
+        }
     }
 
     private int offsetStageCnt = 0;
@@ -397,7 +435,7 @@ public class FOVscript : MonoBehaviour
 
     //Twitch Plays
 #pragma warning disable 414
-    private const string TwitchHelpMessage = @"!{0} play to press the big button, !{0} type 69420 to type in 69420 at the end";
+    private const string TwitchHelpMessage = @"!{0} play to press the big button, !{0} type 69420 to type in 69420 at the end, !{0} stage to press the stage display in a stage recovery";
 #pragma warning restore 414
 
     IEnumerator ProcessTwitchCommand(string command)
@@ -407,22 +445,41 @@ public class FOVscript : MonoBehaviour
             bigScreen.OnInteract();
             yield return null;
         }
+        if (Regex.IsMatch(command, @"^\s*stage\s*$", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant))
+        {
+            if (!recovery)
+            {
+                yield return "sendtochaterror The module did not enter stage recovery, command ignored.";
+                yield break;
+            }
+            smallScreen.OnInteract();
+            yield return null;
+        }
         string[] parameters = command.Split(' ');
         if (Regex.IsMatch(parameters[0], @"^\s*type\s*$", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant))
         {
-            if (inputMode)
+            if (!inputMode)
             {
-                yield return "sendtochat PogChamp Here we go!";
+                yield return "sendtochaterror The module did not enter input mode yet (unless you're eager to strike), command ignored.";
+                yield break;
             }
-            for (int i = 0; i < parameters[1].Length; i++)
+            else if (parameters.Length == 1)
             {
-                yield return new WaitForSeconds(0.1f);
-                for (int j = 0; j < 10; j++)
+                yield return "sendtochaterror Go on...type something...";
+                yield break;
+            }
+            else
+            {
+                for (int i = 0; i < parameters[1].Length; i++)
                 {
-                    string comparer = parameters[1].ElementAt(i) + "";
-                    if (comparer.Equals(j.ToString()))
+                    yield return new WaitForSeconds(0.1f);
+                    for (int j = 0; j < 10; j++)
                     {
-                        buttons[j].OnInteract();
+                        string comparer = parameters[1].ElementAt(i) + "";
+                        if (comparer.Equals(j.ToString()))
+                        {
+                            buttons[j].OnInteract();
+                        }
                     }
                 }
             }
