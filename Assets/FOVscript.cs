@@ -109,7 +109,7 @@ public class FOVscript : MonoBehaviour
                 "Kugelblitz",
                 "Multitask",
                 "OmegaDestroyer",
-                "OmegaForest",
+                "OmegaForget",
                 "Organization",
                 "Password Destroyer",
                 "Purgatory",
@@ -435,16 +435,11 @@ public class FOVscript : MonoBehaviour
 
     //Twitch Plays
 #pragma warning disable 414
-    private const string TwitchHelpMessage = @"!{0} play to press the big button, !{0} type 69420 to type in 69420 at the end, !{0} stage to press the stage display in a stage recovery";
+    private const string TwitchHelpMessage = @"!{0} play 5 to press the big button 5 times, !{0} type 69420 to type in 69420 at the end, !{0} stage to press the stage display in a stage recovery";
 #pragma warning restore 414
 
     IEnumerator ProcessTwitchCommand(string command)
     {
-        if (Regex.IsMatch(command, @"^\s*play\s*$", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant))
-        {
-            bigScreen.OnInteract();
-            yield return null;
-        }
         if (Regex.IsMatch(command, @"^\s*stage\s*$", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant))
         {
             if (!recovery)
@@ -456,6 +451,27 @@ public class FOVscript : MonoBehaviour
             yield return null;
         }
         string[] parameters = command.Split(' ');
+        if (Regex.IsMatch(parameters[0], @"^\s*play\s*$", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant))
+        {
+            if (parameters.Length == 1)
+            {
+                bigScreen.OnInteract();
+                yield return null;
+            }
+            else if (Int64.Parse(parameters[1]) > 15)
+            {
+                yield return "sendtochaterror Sorry, but you can't press the play button too many times!";
+                yield break;
+            }
+            else
+            {
+                for (int i = 0; i < Int64.Parse(parameters[1]); i++)
+                {
+                    bigScreen.OnInteract();
+                    yield return new WaitForSeconds(0.8f);
+                }
+            }
+        }
         if (Regex.IsMatch(parameters[0], @"^\s*type\s*$", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant))
         {
             if (!inputMode)
