@@ -35,7 +35,7 @@ public class FOVscript : MonoBehaviour
 
     private string[] tableA = new string[]
     {
-        "ShadowMeow", "Dicey", "MásQuéÉlite", "Obvious", "1254",
+        "Umbra Moruka", "Dicey", "MásQuéÉlite", "Obvious", "1254",
         "Dbros1000", "Bomberjack", "Danielstigman", "Depresso", "ktane1",
         "OEGamer", "jTIS", "Krispy", "Grunkle Squeaky", "Arceus",
         "ScopingLandscape", "Emik", "GhostSalt", "Short_c1rcuit", "Eltrick",
